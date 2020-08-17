@@ -1,0 +1,33 @@
+import json
+import boto3
+from botocore.exceptions import ClientError
+from boto3.dynamodb.conditions import Key, Attr
+import random
+
+def lambda_handler(event, context):
+    sqsclient = boto3.client('sqs')
+    rider_queue_url = 'https://sqs.us-east-1.amazonaws.com/519113664765/ridersofthestorm'
+    
+    response = sqsclient.receive_message(
+        QueueUrl=rider_queue_url,
+        AttributeNames=[
+            'SequenceNumber'
+        ],
+        MaxNumberOfMessages=1,
+        MessageAttributeNames=[
+            'All'
+        ],
+        VisibilityTimeout=0,
+        WaitTimeSeconds=1
+    )
+
+    if 'Messages' in response:
+        for message in response['Messages']:
+            receipt_handle = message['ReceiptHandle']
+            req_attributes = message['MessageAttributes']
+
+            destination = req_attributes['Location']['StringValue']
+            print(destination)
+            return req_attributes
+            
+    return response

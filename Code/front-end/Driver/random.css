@@ -1,0 +1,74 @@
+.card {
+box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+max-width: 300px;
+margin-top: 0px;
+margin-left: 770px;
+text-align: center;
+font-family: arial;
+background-color: white;
+}
+
+.btn-group button {
+  background-color: black; /* Green background */
+  border: 1px blue; /* Green border */
+  color: white; /* White text */
+  padding: 10px 24px; /* Some padding */
+  cursor: pointer; /* Pointer/hand icon */
+  float: left; /* Float the buttons side by side */
+}
+
+.btn-group button:not(:last-child) {
+  border-right: none; /* Prevent double borders */
+}
+
+/* Clear floats (clearfix hack) */
+.btn-group:after {
+  content: "";
+  clear: both;
+  display: table;
+}
+
+/* Add a background color on hover */
+.btn-group button:hover {
+  background-color: #3e8e41;
+}
+
+body {
+background-image: url("NYC.jpg");
+background-repeat: no-repeat;
+background-size: cover;
+}
+h1{
+font-size: 30px;
+text-align: center;
+margin-left: 770px;
+width: 300px;
+background-color: white;
+}
+.title {
+  color: grey;
+  font-size: 18px;
+}
+input[type=button] {
+  border: none;
+  outline: 0;
+  display: inline-block;
+  padding: 8px;
+  color: white;
+  background-color: #000;
+  text-align: center;
+  cursor: pointer;
+  width: 100%;
+  font-size: 18px;
+}
+
+a {
+  text-decoration: none;
+  font-size: 22px;
+  color: black;
+}
+
+button:hover, a:hover {
+  opacity: 0.7;
+}
+

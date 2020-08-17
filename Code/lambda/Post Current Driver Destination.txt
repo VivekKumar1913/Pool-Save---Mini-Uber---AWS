@@ -1,0 +1,53 @@
+import json
+import boto3
+from botocore.exceptions import ClientError
+from boto3.dynamodb.conditions import Key, Attr
+import random
+
+def lambda_handler(event, context):
+    sqsclient = boto3.client('sqs')
+    queue_url = 'https://sqs.us-east-1.amazonaws.com/519113664765/driverlocation'
+
+    print(event['source_lat'])
+    print(event['source_long'])
+    print(event['destination_lat'])
+    print(event['destination_long'])
+
+    messageAttributes = {
+            'driverid': {
+                'DataType': 'String',
+                'StringValue': '1'
+            },
+            'SourceLat': {
+                'DataType': 'String',
+                'StringValue': str(event['source_lat'])
+            },
+            'SourceLong': {
+                'DataType': 'String',
+                'StringValue': str(event['source_long'])
+            },
+            'DestLat': {
+                'DataType': 'String',
+                'StringValue': str(event['destination_lat'])
+            },
+            'DestLong': {
+                'DataType': 'String',
+                'StringValue': str(event['destination_long'])
+            }
+        }
+
+    response = sqsclient.send_message(
+        QueueUrl=queue_url,
+        MessageBody = ('driver coordinates'),
+        MessageAttributes = messageAttributes
+    )
+
+    return {
+        "status_code": 200,
+        "message": "success"
+    }
+
+
+
+    
+     	

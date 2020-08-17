@@ -1,0 +1,82 @@
+import json
+import boto3
+from botocore.exceptions import ClientError
+from boto3.dynamodb.conditions import Key, Attr
+import random
+
+
+def lambda_handler(event, context):
+    sqsclient = boto3.client('sqs')
+    rider_queue_url = 'https://sqs.us-east-1.amazonaws.com/519113664765/ridersofthestorm'
+    
+    rider_response = sqsclient.receive_message(
+        QueueUrl=rider_queue_url,
+        AttributeNames=[
+            'SequenceNumber'
+        ],
+        MaxNumberOfMessages=1,
+        MessageAttributeNames=[
+            'All'
+        ],
+        VisibilityTimeout=0,
+        WaitTimeSeconds=1
+    )
+
+    Username = None
+    destination = None
+
+    if 'Messages' in rider_response:
+        for message in rider_response['Messages']:
+            req_attributes = message['MessageAttributes']
+
+            destination = req_attributes['Location']['StringValue']
+            Username = req_attributes['Username']['StringValue']
+            print(destination)
+
+    print (Username)
+    print (destination)
+
+    driver_queue_url = 'https://sqs.us-east-1.amazonaws.com/519113664765/driverlocation'   
+
+    driver_response = sqsclient.receive_message(
+        QueueUrl=driver_queue_url,
+        AttributeNames=[
+            'SequenceNumber'
+        ],
+        MaxNumberOfMessages=1,
+        MessageAttributeNames=[
+            'All'
+        ],
+        VisibilityTimeout=0,
+        WaitTimeSeconds=1
+    )  
+
+    sourceLat = None
+    sourceLong = None
+    driverid = None
+    if 'Messages' in driver_response:
+        for message in driver_response['Messages']:
+            req_attributes = message['MessageAttributes']
+            sourceLat = req_attributes['SourceLat']['StringValue']
+            sourceLong = req_attributes['SourceLong']['StringValue']
+            driverid = req_attributes['driverid']['StringValue']
+
+    dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
+    ride_table = dynamodb.Table('rides')
+
+    rideid = ""
+    for i in range(6):
+        rideid+=str(random.randint(1,9))
+
+    ride_table.put_item(
+        Item={
+                "rideid": rideid,
+                "sourceLat": sourceLat,
+                "sourceLong": sourceLong,
+                "riderid": Username,
+                "driverid": driverid,
+                "ride_status" : event['ride_status']            
+            } 
+    )
+
+    return "success"

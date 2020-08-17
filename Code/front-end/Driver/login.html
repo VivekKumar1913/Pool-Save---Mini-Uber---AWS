@@ -1,0 +1,91 @@
+<html>
+<head>
+<title>Pool & Save</title>
+<!-- Include CSS File Here -->
+<link rel="stylesheet" href="style-login.css"/>
+<!-- Include JS File Here -->
+<script src="login.js"></script>
+<!-- Javascript SDKs-->
+<script src="https://code.jquery.com/jquery-1.11.3.min.js"></script> 
+<script src="js/amazon-cognito-auth.min.js"></script>
+<script src="https://sdk.amazonaws.com/js/aws-sdk-2.7.16.min.js"></script> 
+<script src="js/amazon-cognito-identity.min.js"></script>   
+<script src="js/config.js"></script>
+</head>
+
+ <style>
+  body{
+    background-image: url("background_img.jpg");
+           height: 100%;
+         /* Center and scale the image nicely */
+         background-position: center;
+         background-repeat: no-repeat;
+         background-size: cover;  }
+
+  }
+  div {
+    text-align: center;
+  }
+
+</style>
+<body>
+<div class="container">
+<div class="main">
+<h2>Driver Login</h2>
+<form id="form_id" method="post" name="myform">
+<label>Username :</label>
+<input type="text" id="inputUsername"  placeholder="Email address" name="username" required autofocus>
+<label>Password :</label>
+<input type="password" id="inputPassword"  placeholder="Password" name="password" required>    
+<input type="button" value="Login"  onclick="signInButton()"/>
+<label>New User? Register Here  :</label>
+<input type="button" value="Register"  onclick="redirectme()"/>
+</form>
+</div>
+</div>
+<script>
+  function redirectme()
+  {
+    window.location = "driversignup.html";
+  }
+
+
+ function signInButton() {
+    
+  var authenticationData = {
+        Username : document.getElementById("inputUsername").value,
+        Password : document.getElementById("inputPassword").value,
+    };
+  
+    var authenticationDetails = new AmazonCognitoIdentity.AuthenticationDetails(authenticationData);
+    
+  var poolData = {
+        UserPoolId : _config.cognito.userPoolId, // Your user pool id here
+        ClientId : _config.cognito.clientId, // Your client id here
+    };
+  
+    var userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
+  
+    var userData = {
+        Username : document.getElementById("inputUsername").value,
+        Pool : userPool,
+    };
+  
+    var cognitoUser = new AmazonCognitoIdentity.CognitoUser(userData);
+    
+  cognitoUser.authenticateUser(authenticationDetails, {
+        onSuccess: function (result) {
+      var accessToken = result.getAccessToken().getJwtToken();
+      console.log(accessToken);
+      window.location = "driverprofile.html"; 
+        },
+
+        onFailure: function(err) {
+            alert(err.message || JSON.stringify(err));
+        },
+    });
+  }
+
+</script>
+</body>
+</html>

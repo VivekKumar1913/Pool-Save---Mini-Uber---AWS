@@ -1,0 +1,52 @@
+import json
+import sys
+import boto3
+import base64
+from botocore.vendored import requests
+import random
+import time
+
+def lambda_handler(event, context):
+    rekognition = boto3.client('rekognition')
+    s3 = boto3.resource(service_name='s3')
+    bucket = s3.Bucket('pooluserphotos')
+    target_response = requests.get('https://upload-bucket-rider.s3.amazonaws.com/img2.jpg')
+    
+    recognized_image_key = ''
+    faceId = ''
+
+    for obj in bucket.objects.all():
+        recognized_image_key = obj.key
+
+        url = "https://pooluserphotos.s3.amazonaws.com/{0}".format(obj.key)
+        source_response = requests.get(url)
+        source_response_content = source_response.content
+        target_response_content = target_response.content
+        rekognition_response = rekognition.compare_faces(SourceImage={'Bytes': source_response_content}, TargetImage={'Bytes': target_response_content}) 
+
+        if rekognition_response['FaceMatches']:            
+            topic_arn = "arn:aws:sns:us-east-1:519113664765:RiderIdentification"
+            sns = boto3.client("sns")
+            msg = "Faces match "
+            sub = "Rider Identified"
+            response = sns.publish(
+            TopicArn=topic_arn,
+            Message=msg,
+            Subject=sub
+            ) 
+            print("sns sent" + json.dumps(response))
+            return "faces MATCHHH"
+        else:
+            
+            topic_arn = "arn:aws:sns:us-east-1:519113664765:RiderIdentification"
+            sns = boto3.client("sns")
+            msg = "Faces dont match "
+            sub = "Rider NOT Identified"
+            response = sns.publish(
+            TopicArn=topic_arn,
+            Message=msg,
+            Subject=sub
+            ) 
+            print("sns sent" + json.dumps(response))
+
+    return "faces dont match"
